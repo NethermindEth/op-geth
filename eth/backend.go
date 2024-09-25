@@ -111,7 +111,7 @@ type Ethereum struct {
 
 // New creates a new Ethereum object (including the initialisation of the common Ethereum object),
 // whose lifecycle will be managed by the provided node.
-func New(stack *node.Node, config *ethconfig.Config) (*Ethereum, error) {
+func New(stack *node.Node, config *ethconfig.Config, l1RPCEndpoint string) (*Ethereum, error) {
 	// Ensure configuration values are compatible and sane
 	if !config.SyncMode.IsValid() {
 		return nil, fmt.Errorf("invalid sync mode %d", config.SyncMode)
@@ -229,6 +229,7 @@ func New(stack *node.Node, config *ethconfig.Config) (*Ethereum, error) {
 	if config.OverrideOptimismCanyon != nil {
 		overrides.OverrideOptimismCanyon = config.OverrideOptimismCanyon
 	}
+
 	if config.OverrideOptimismEcotone != nil {
 		overrides.OverrideOptimismEcotone = config.OverrideOptimismEcotone
 	}
@@ -250,6 +251,9 @@ func New(stack *node.Node, config *ethconfig.Config) (*Ethereum, error) {
 	shouldPreserve := func(header *types.Header) bool {
 		return false
 	}
+	
+    // [rollup-geth]
+	activateL1RPCEndpoint(l1RPCEndpoint, &vmConfig)
 	eth.blockchain, err = core.NewBlockChain(chainDb, cacheConfig, config.Genesis, &overrides, eth.engine, vmConfig, shouldPreserve, &config.TransactionHistory)
 	if err != nil {
 		return nil, err
