@@ -21,6 +21,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"maps"
 	"math/big"
 	"slices"
 
@@ -47,6 +48,8 @@ type PrecompiledContract interface {
 	RequiredGas(input []byte) uint64  // RequiredPrice calculates the contract gas use
 	Run(input []byte) ([]byte, error) // Run runs the precompiled contract
 }
+
+type PrecompiledContracts map[common.Address]PrecompiledContract
 
 // PrecompiledContractsHomestead contains the default set of pre-compiled Ethereum
 // contracts used in the Frontier and Homestead releases.
@@ -202,9 +205,9 @@ func init() {
 	}
 	for k := range PrecompiledContractsPrague {
 		PrecompiledAddressesPrague = append(PrecompiledAddressesPrague, k)
-	} 
+	}
 
-for k := range PrecompiledContractsFjord {
+	for k := range PrecompiledContractsFjord {
 		PrecompiledAddressesFjord = append(PrecompiledAddressesFjord, k)
 	}
 	for k := range PrecompiledContractsGranite {
@@ -215,7 +218,7 @@ for k := range PrecompiledContractsFjord {
 func activePrecompiledContracts(rules params.Rules, config *RollupPrecompileActivationConfig) PrecompiledContracts {
 	var activePrecompiles PrecompiledContracts
 	switch {
-case rules.IsOptimismGranite:
+	case rules.IsOptimismGranite:
 		return PrecompiledContractsGranite
 	case rules.IsOptimismFjord:
 		return PrecompiledContractsFjord
@@ -273,8 +276,7 @@ func ActivePrecompiles(rules params.Rules) []common.Address {
 	}
 
 	// [rollup-geth]
-	activePrecompileAddresses =
-		append(activePrecompileAddresses, slices.Collect(maps.Keys(activeRollupPrecompiledContracts(rules)))...)
+	activePrecompileAddresses = append(activePrecompileAddresses, slices.Collect(maps.Keys(activeRollupPrecompiledContracts(rules)))...)
 
 	return activePrecompileAddresses
 }
